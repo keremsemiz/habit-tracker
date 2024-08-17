@@ -126,7 +126,7 @@ body.dark-mode #theme-switcher {
     margin-bottom: 20px;
 }
 
-#reminder-habit, #reminder-time {
+#reminder-habit, #reminder-time, #reminder-frequency {
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
@@ -151,6 +151,7 @@ body.dark-mode #theme-switcher {
 .reminder-item button:hover {
     background-color: #c9302c;
 }
+
 
 #new-category {
     padding: 10px;

@@ -16,6 +16,7 @@ const categoryList = document.getElementById('category-list');
 const reminderForm = document.getElementById('reminder-form');
 const reminderHabitSelect = document.getElementById('reminder-habit');
 const reminderTimeInput = document.getElementById('reminder-time');
+const reminderFrequencySelect = document.getElementById('reminder-frequency');
 const reminderList = document.getElementById('reminder-list');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
 let categories = JSON.parse(localStorage.getItem('categories')) || ['health', 'productivity', 'learning'];
@@ -65,8 +66,9 @@ reminderForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const habitId = reminderHabitSelect.value;
     const reminderTime = reminderTimeInput.value;
+    const reminderFrequency = reminderFrequencySelect.value;
     if (habitId && reminderTime) {
-        addReminder(habitId, reminderTime);
+        addReminder(habitId, reminderTime, reminderFrequency);
         reminderTimeInput.value = '';
     }
 });
@@ -96,11 +98,12 @@ function addHabit(name, category, frequency) {
     updateReminderOptions();
 }
 
-function addReminder(habitId, time) {
+function addReminder(habitId, time, frequency) {
     const reminder = {
         id: Date.now(),
         habitId: habitId,
-        time: time
+        time: time,
+        frequency: frequency
     };
     reminders.push(reminder);
     updateLocalStorage();
@@ -164,7 +167,7 @@ function renderReminders() {
         const habit = habits.find(h => h.id === reminder.habitId);
         const reminderItem = document.createElement('div');
         reminderItem.classList.add('reminder-item');
-        reminderItem.textContent = `Reminder for ${habit.name} at ${reminder.time}`;
+        reminderItem.textContent = `Reminder for ${habit.name} at ${reminder.time} (${reminder.frequency})`;
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
@@ -196,7 +199,26 @@ function scheduleNotification(reminder) {
         const timeout = reminderTime - now;
         setTimeout(function () {
             showNotification(reminder);
+            if (reminder.frequency === 'daily' || reminder.frequency === 'weekly') {
+                scheduleRecurringNotification(reminder);
+            }
         }, timeout);
+    }
+}
+
+function scheduleRecurringNotification(reminder) {
+    const [hours, minutes] = reminder.time.split(':');
+    let interval = 0;
+    if (reminder.frequency === 'daily') {
+        interval = 24 * 60 * 60 * 1000;
+    } else if (reminder.frequency === 'weekly') {
+        interval = 7 * 24 * 60 * 60 * 1000;
+    }
+
+    if (interval > 0) {
+        setInterval(function () {
+            showNotification(reminder);
+        }, interval);
     }
 }
 
@@ -262,7 +284,7 @@ function removeHabit(id) {
     habits = habits.filter(function (habit) {
         return habit.id !== id;
     });
-    reminders = reminders.filter(reminder => reminder.habitId !== id); // Remove associated reminders
+    reminders = reminders.filter(reminder => reminder.habitId !== id);
     updateLocalStorage();
     renderHabits();
     updateOverview();
