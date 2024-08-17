@@ -227,7 +227,7 @@ function showNotification(reminder) {
     if (habit && Notification.permission === 'granted') {
         new Notification(`Habit Reminder`, {
             body: `Time to work on your habit: ${habit.name}`,
-            icon: './assets/icons/habit.png'
+            icon: '/assets/icons/habit.png'
         });
     }
 }
@@ -243,9 +243,19 @@ function requestNotificationPermission() {
 }
 
 function removeReminder(id) {
-    reminders = reminders.filter(reminder => reminder.id !== id);
-    updateLocalStorage();
-    renderReminders();
+    const reminderItem = document.querySelector(`.reminder-item[data-id="${id}"]`);
+    if (reminderItem) {
+        reminderItem.classList.add('removed');
+        setTimeout(() => {
+            reminders = reminders.filter(reminder => reminder.id !== id);
+            updateLocalStorage();
+            renderReminders();
+        }, 500);
+    } else {
+        reminders = reminders.filter(reminder => reminder.id !== id);
+        updateLocalStorage();
+        renderReminders();
+    }
 }
 
 function resetProgressIfNeeded(habit) {
@@ -284,7 +294,7 @@ function removeHabit(id) {
     habits = habits.filter(function (habit) {
         return habit.id !== id;
     });
-    reminders = reminders.filter(reminder => reminder.habitId !== id);
+    reminders = reminders.filter(reminder => reminder.habitId !== id); 
     updateLocalStorage();
     renderHabits();
     updateOverview();
