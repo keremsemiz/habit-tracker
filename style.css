@@ -1,0 +1,71 @@
+body, h1, h2, p {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+main {
+    width: 100%;
+    max-width: 800px;
+}
+
+#habit-list {
+    margin-bottom: 20px;
+}
+
+.habit {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+#add-habit {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+#habit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#habit-name {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
