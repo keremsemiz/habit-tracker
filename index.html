@@ -24,14 +24,7 @@
 
         <section id="habit-list">
             <h2>Your Habits</h2>
-            <div class="habit">
-                <h3>Example Habit</h3>
-                <div class="progress">
-                    <span class="progress-bar" style="width: 50%;"></span>
-                </div>
-                <button class="complete-btn">Mark as Complete</button>
-                <button class="remove-btn">Remove</button>
-            </div>
+            <!-- dynamic insertion -->
         </section>
 
         <section id="add-habit">
@@ -45,7 +38,19 @@
                 <button type="submit">Add Habit</button>
             </form>
         </section>
-        
+
+        <section id="edit-habit">
+            <h2>Edit Habit</h2>
+            <form id="edit-habit-form">
+                <input type="text" id="edit-habit-name" placeholder="Enter habit name" required>
+                <select id="edit-habit-frequency">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+                <button type="submit">Save Changes</button>
+                <button type="button" id="cancel-edit">Cancel</button>
+            </form>
+        </section>
 
         <section id="settings">
             <h2>Settings</h2>

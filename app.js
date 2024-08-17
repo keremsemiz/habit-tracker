@@ -2,10 +2,13 @@ const habitForm = document.getElementById('habit-form');
 const habitNameInput = document.getElementById('habit-name');
 const habitFrequencySelect = document.getElementById('habit-frequency');
 const habitList = document.getElementById('habit-list');
-const totalHabitsEl = document.getElementById('total-habits');
-const completedHabitsEl = document.getElementById('completed-habits');
-const longestStreakEl = document.getElementById('longest-streak');
+const editHabitForm = document.getElementById('edit-habit-form');
+const editHabitNameInput = document.getElementById('edit-habit-name');
+const editHabitFrequencySelect = document.getElementById('edit-habit-frequency');
+const editHabitSection = document.getElementById('edit-habit');
+const cancelEditBtn = document.getElementById('cancel-edit');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
+let habitToEdit = null;
 
 habitForm.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -15,6 +18,24 @@ habitForm.addEventListener('submit', function (event) {
         addHabit(habitName, habitFrequency);
         habitNameInput.value = '';
     }
+});
+
+editHabitForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const newName = editHabitNameInput.value.trim();
+    const newFrequency = editHabitFrequencySelect.value;
+    if (newName !== '' && habitToEdit !== null) {
+        editHabit(habitToEdit, newName, newFrequency);
+        habitToEdit = null;
+        editHabitSection.style.display = 'none';
+        habitForm.style.display = 'block';
+    }
+});
+
+cancelEditBtn.addEventListener('click', function () {
+    habitToEdit = null;
+    editHabitSection.style.display = 'none';
+    habitForm.style.display = 'block';
 });
 
 function addHabit(name, frequency) {
@@ -58,6 +79,13 @@ function renderHabits() {
             markHabitComplete(habit.id);
         });
 
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.classList.add('edit-btn');
+        editButton.addEventListener('click', function () {
+            startEditHabit(habit.id);
+        });
+
         const removeButton = document.createElement('button');
         removeButton.textContent = 'Remove';
         removeButton.classList.add('remove-btn');
@@ -69,6 +97,7 @@ function renderHabits() {
         habitDiv.appendChild(habitTitle);
         habitDiv.appendChild(progressDiv);
         habitDiv.appendChild(completeButton);
+        habitDiv.appendChild(editButton);
         habitDiv.appendChild(removeButton);
 
         habitList.appendChild(habitDiv);
@@ -109,6 +138,30 @@ function markHabitComplete(id) {
 function removeHabit(id) {
     habits = habits.filter(function (habit) {
         return habit.id !== id;
+    });
+    updateLocalStorage();
+    renderHabits();
+    updateOverview();
+}
+
+function startEditHabit(id) {
+    const habit = habits.find(habit => habit.id === id);
+    if (habit) {
+        habitToEdit = id;
+        editHabitNameInput.value = habit.name;
+        editHabitFrequencySelect.value = habit.frequency;
+        editHabitSection.style.display = 'block';
+        habitForm.style.display = 'none';
+    }
+}
+
+function editHabit(id, newName, newFrequency) {
+    habits = habits.map(function (habit) {
+        if (habit.id === id) {
+            habit.name = newName;
+            habit.frequency = newFrequency;
+        }
+        return habit;
     });
     updateLocalStorage();
     renderHabits();

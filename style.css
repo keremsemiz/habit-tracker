@@ -19,7 +19,7 @@ header {
     align-items: center;
     width: 100%;
     max-width: 800px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 h1 {
@@ -44,14 +44,14 @@ main {
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 #habit-overview p {
     margin: 5px 0;
 }
 
-
-#habit-list, #add-habit, #settings {
+#habit-list, #add-habit, #edit-habit, #settings {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -59,8 +59,44 @@ main {
     margin-bottom: 20px;
 }
 
-.habit {
+#habit-form, #edit-habit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#habit-name, #edit-habit-name, #habit-frequency, #edit-habit-frequency {
+    padding: 10px;
     margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+button {
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+button#cancel-edit {
+    background-color: #d9534f;
+    margin-top: 10px;
+}
+
+
+.habit {
+    transition: transform 0.3s ease;
+}
+
+.habit:hover {
+    transform: scale(1.02);
 }
 
 .progress {
@@ -77,7 +113,7 @@ main {
     border-radius: 4px;
 }
 
-.complete-btn, .remove-btn {
+.complete-btn, .edit-btn, .remove-btn {
     margin-top: 10px;
     padding: 5px 10px;
     border-radius: 4px;
@@ -90,50 +126,16 @@ main {
     color: white;
 }
 
+.edit-btn {
+    background-color: #f0ad4e;
+    color: white;
+    margin-left: 5px;
+}
+
 .remove-btn {
     background-color: #d9534f;
     color: white;
-}
-
-button:hover {
-    opacity: 0.8;
-}
-
-#habit-form {
-    display: flex;
-    flex-direction: column;
-}
-
-#habit-form select {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-}
-
-#habit-form button {
-    margin-top: 10px;
-}
-
-#habit-name {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
-button {
-    padding: 10px;
-    border-radius: 4px;
-    border: none;
-    background-color: #5cb85c;
-    color: white;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #4cae4c;
+    margin-left: 5px;
 }
 
 #settings-content {
