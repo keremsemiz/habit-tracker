@@ -31,6 +31,11 @@
             <h2>Add New Habit</h2>
             <form id="habit-form">
                 <input type="text" id="habit-name" placeholder="Enter habit name" required>
+                <select id="habit-category">
+                    <option value="health">Health</option>
+                    <option value="productivity">Productivity</option>
+                    <option value="learning">Learning</option>
+                </select>
                 <select id="habit-frequency">
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -38,11 +43,16 @@
                 <button type="submit">Add Habit</button>
             </form>
         </section>
-
+        
         <section id="edit-habit">
             <h2>Edit Habit</h2>
             <form id="edit-habit-form">
                 <input type="text" id="edit-habit-name" placeholder="Enter habit name" required>
+                <select id="edit-habit-category">
+                    <option value="health">Health</option>
+                    <option value="productivity">Productivity</option>
+                    <option value="learning">Learning</option>
+                </select>
                 <select id="edit-habit-frequency">
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -51,6 +61,15 @@
                 <button type="button" id="cancel-edit">Cancel</button>
             </form>
         </section>
+        
+        <section id="analytics">
+            <h2>Analytics Dashboard</h2>
+            <div id="analytics-content">
+                <p>Health Habits Completed: <span id="health-completed">0</span></p>
+                <p>Productivity Habits Completed: <span id="productivity-completed">0</span></p>
+                <p>Learning Habits Completed: <span id="learning-completed">0</span></p>
+            </div>
+        </section>        
 
         <section id="settings">
             <h2>Settings</h2>

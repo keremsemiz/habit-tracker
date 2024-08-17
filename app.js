@@ -1,21 +1,26 @@
 const habitForm = document.getElementById('habit-form');
 const habitNameInput = document.getElementById('habit-name');
+const habitCategorySelect = document.getElementById('habit-category');
 const habitFrequencySelect = document.getElementById('habit-frequency');
 const habitList = document.getElementById('habit-list');
 const editHabitForm = document.getElementById('edit-habit-form');
 const editHabitNameInput = document.getElementById('edit-habit-name');
+const editHabitCategorySelect = document.getElementById('edit-habit-category');
 const editHabitFrequencySelect = document.getElementById('edit-habit-frequency');
 const editHabitSection = document.getElementById('edit-habit');
 const cancelEditBtn = document.getElementById('cancel-edit');
+const themeSwitcher = document.getElementById('theme-switcher');
+const analyticsContent = document.getElementById('analytics-content');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
 let habitToEdit = null;
 
 habitForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const habitName = habitNameInput.value.trim();
+    const habitCategory = habitCategorySelect.value;
     const habitFrequency = habitFrequencySelect.value;
     if (habitName !== '') {
-        addHabit(habitName, habitFrequency);
+        addHabit(habitName, habitCategory, habitFrequency);
         habitNameInput.value = '';
     }
 });
@@ -23,9 +28,10 @@ habitForm.addEventListener('submit', function (event) {
 editHabitForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const newName = editHabitNameInput.value.trim();
+    const newCategory = editHabitCategorySelect.value;
     const newFrequency = editHabitFrequencySelect.value;
     if (newName !== '' && habitToEdit !== null) {
-        editHabit(habitToEdit, newName, newFrequency);
+        editHabit(habitToEdit, newName, newCategory, newFrequency);
         habitToEdit = null;
         editHabitSection.style.display = 'none';
         habitForm.style.display = 'block';
@@ -38,21 +44,28 @@ cancelEditBtn.addEventListener('click', function () {
     habitForm.style.display = 'block';
 });
 
-function addHabit(name, frequency) {
+themeSwitcher.addEventListener('click', function () {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+});
+
+function addHabit(name, category, frequency) {
     const habit = {
         id: Date.now(),
         name: name,
+        category: category,
         frequency: frequency,
         completed: false,
         progress: 0,
         streak: 0,
         longestStreak: 0,
-        lastUpdated: new Date().toISOString().split('T')[0] 
+        lastUpdated: new Date().toISOString().split('T')[0]
     };
     habits.push(habit);
     updateLocalStorage();
     renderHabits();
     updateOverview();
+    updateAnalytics();
 }
 
 function renderHabits() {
@@ -63,7 +76,7 @@ function renderHabits() {
         habitDiv.classList.add('habit');
 
         const habitTitle = document.createElement('h3');
-        habitTitle.textContent = habit.name;
+        habitTitle.textContent = `${habit.name} (${habit.category})`;
 
         const progressDiv = document.createElement('div');
         progressDiv.classList.add('progress');
@@ -133,6 +146,7 @@ function markHabitComplete(id) {
     updateLocalStorage();
     renderHabits();
     updateOverview();
+    updateAnalytics();
 }
 
 function removeHabit(id) {
@@ -142,6 +156,7 @@ function removeHabit(id) {
     updateLocalStorage();
     renderHabits();
     updateOverview();
+    updateAnalytics();
 }
 
 function startEditHabit(id) {
@@ -149,16 +164,18 @@ function startEditHabit(id) {
     if (habit) {
         habitToEdit = id;
         editHabitNameInput.value = habit.name;
+        editHabitCategorySelect.value = habit.category;
         editHabitFrequencySelect.value = habit.frequency;
         editHabitSection.style.display = 'block';
         habitForm.style.display = 'none';
     }
 }
 
-function editHabit(id, newName, newFrequency) {
+function editHabit(id, newName, newCategory, newFrequency) {
     habits = habits.map(function (habit) {
         if (habit.id === id) {
             habit.name = newName;
+            habit.category = newCategory;
             habit.frequency = newFrequency;
         }
         return habit;
@@ -166,6 +183,7 @@ function editHabit(id, newName, newFrequency) {
     updateLocalStorage();
     renderHabits();
     updateOverview();
+    updateAnalytics();
 }
 
 function updateOverview() {
@@ -178,9 +196,20 @@ function updateOverview() {
     longestStreakEl.textContent = `${longestStreak} days`;
 }
 
+function updateAnalytics() {
+    const healthCompleted = habits.filter(habit => habit.completed && habit.category === 'health').length;
+    const productivityCompleted = habits.filter(habit => habit.completed && habit.category === 'productivity').length;
+    const learningCompleted = habits.filter(habit => habit.completed && habit.category === 'learning').length;
+
+    document.getElementById('health-completed').textContent = healthCompleted;
+    document.getElementById('productivity-completed').textContent = productivityCompleted;
+    document.getElementById('learning-completed').textContent = learningCompleted;
+}
+
 function updateLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
 }
 
 renderHabits();
 updateOverview();
+updateAnalytics();

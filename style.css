@@ -72,6 +72,42 @@ main {
     background-color: #fff;
 }
 
+#habit-form select, #edit-habit-form select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+#analytics {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#analytics p {
+    margin: 5px 0;
+}
+
+body.light-mode {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+body.dark-mode {
+    background-color: #333;
+    color: #f4f4f4;
+}
+
+body.dark-mode #theme-switcher {
+    background-color: #555;
+    color: #fff;
+}
+
+
 button {
     padding: 10px;
     border-radius: 4px;
