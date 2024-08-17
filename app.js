@@ -1,31 +1,37 @@
 const habitForm = document.getElementById('habit-form');
 const habitNameInput = document.getElementById('habit-name');
+const habitFrequencySelect = document.getElementById('habit-frequency');
 const habitList = document.getElementById('habit-list');
-let habits = [];
+let habits = JSON.parse(localStorage.getItem('habits')) || [];
 
 habitForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const habitName = habitNameInput.value.trim();
+    const habitFrequency = habitFrequencySelect.value;
     if (habitName !== '') {
-        addHabit(habitName);
+        addHabit(habitName, habitFrequency);
         habitNameInput.value = '';
     }
 });
 
-function addHabit(name) {
+function addHabit(name, frequency) {
     const habit = {
         id: Date.now(),
         name: name,
+        frequency: frequency,
         completed: false,
-        progress: 0
+        progress: 0,
+        lastUpdated: new Date().toISOString().split('T')[0] // Store only the date
     };
     habits.push(habit);
+    updateLocalStorage();
     renderHabits();
 }
 
 function renderHabits() {
     habitList.innerHTML = '';
     habits.forEach(function (habit) {
+        resetProgressIfNeeded(habit);
         const habitDiv = document.createElement('div');
         habitDiv.classList.add('habit');
 
@@ -63,14 +69,27 @@ function renderHabits() {
     });
 }
 
+function resetProgressIfNeeded(habit) {
+    const today = new Date().toISOString().split('T')[0];
+    if (habit.lastUpdated !== today) {
+        if (habit.frequency === 'daily' || (habit.frequency === 'weekly' && new Date(habit.lastUpdated) < new Date(today).setDate(new Date(today).getDate() - 7))) {
+            habit.progress = 0;
+            habit.completed = false;
+            habit.lastUpdated = today;
+        }
+    }
+}
+
 function markHabitComplete(id) {
     habits = habits.map(function (habit) {
         if (habit.id === id) {
-            habit.progress = 100;
-            habit.completed = true;
+            habit.progress = Math.min(habit.progress + 25, 100);
+            habit.completed = habit.progress === 100;
+            habit.lastUpdated = new Date().toISOString().split('T')[0];
         }
         return habit;
     });
+    updateLocalStorage();
     renderHabits();
 }
 
@@ -78,5 +97,12 @@ function removeHabit(id) {
     habits = habits.filter(function (habit) {
         return habit.id !== id;
     });
+    updateLocalStorage();
     renderHabits();
 }
+
+function updateLocalStorage() {
+    localStorage.setItem('habits', JSON.stringify(habits));
+}
+
+renderHabits();

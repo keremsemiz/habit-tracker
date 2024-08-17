@@ -92,6 +92,18 @@ button:hover {
     flex-direction: column;
 }
 
+#habit-form select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+#habit-form button {
+    margin-top: 10px;
+}
+
 #habit-name {
     padding: 10px;
     margin-bottom: 10px;
