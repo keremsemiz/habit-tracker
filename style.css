@@ -120,6 +120,38 @@ body.dark-mode #theme-switcher {
     flex-direction: column;
 }
 
+#reminder-form {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+#reminder-habit, #reminder-time {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#reminder-list .reminder-item {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.reminder-item button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    cursor: pointer;
+}
+
+.reminder-item button:hover {
+    background-color: #c9302c;
+}
+
 #new-category {
     padding: 10px;
     margin-bottom: 10px;

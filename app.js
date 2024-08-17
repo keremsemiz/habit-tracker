@@ -10,13 +10,16 @@ const editHabitFrequencySelect = document.getElementById('edit-habit-frequency')
 const editHabitSection = document.getElementById('edit-habit');
 const cancelEditBtn = document.getElementById('cancel-edit');
 const themeSwitcher = document.getElementById('theme-switcher');
-const analyticsContent = document.getElementById('analytics-content');
 const categoryForm = document.getElementById('category-form');
 const newCategoryInput = document.getElementById('new-category');
 const categoryList = document.getElementById('category-list');
-const reminderContent = document.getElementById('reminder-content');
+const reminderForm = document.getElementById('reminder-form');
+const reminderHabitSelect = document.getElementById('reminder-habit');
+const reminderTimeInput = document.getElementById('reminder-time');
+const reminderList = document.getElementById('reminder-list');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
 let categories = JSON.parse(localStorage.getItem('categories')) || ['health', 'productivity', 'learning'];
+let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
 let habitToEdit = null;
 
 habitForm.addEventListener('submit', function (event) {
@@ -58,6 +61,16 @@ categoryForm.addEventListener('submit', function (event) {
     }
 });
 
+reminderForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const habitId = reminderHabitSelect.value;
+    const reminderTime = reminderTimeInput.value;
+    if (habitId && reminderTime) {
+        addReminder(habitId, reminderTime);
+        reminderTimeInput.value = '';
+    }
+});
+
 themeSwitcher.addEventListener('click', function () {
     document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
@@ -80,13 +93,19 @@ function addHabit(name, category, frequency) {
     renderHabits();
     updateOverview();
     updateAnalytics();
+    updateReminderOptions();
 }
 
-function addCategory(name) {
-    categories.push(name);
-    updateCategoryOptions();
+function addReminder(habitId, time) {
+    const reminder = {
+        id: Date.now(),
+        habitId: habitId,
+        time: time
+    };
+    reminders.push(reminder);
     updateLocalStorage();
-    renderCategories();
+    renderReminders();
+    scheduleNotification(reminder);
 }
 
 function renderHabits() {
@@ -136,24 +155,75 @@ function renderHabits() {
 
         habitList.appendChild(habitDiv);
     });
+    updateReminderOptions();
 }
 
-function renderCategories() {
-    categoryList.innerHTML = '';
-    categories.forEach(function (category) {
-        const categoryItem = document.createElement('div');
-        categoryItem.classList.add('category-item');
-        categoryItem.textContent = category;
+function renderReminders() {
+    reminderList.innerHTML = '';
+    reminders.forEach(function (reminder) {
+        const habit = habits.find(h => h.id === reminder.habitId);
+        const reminderItem = document.createElement('div');
+        reminderItem.classList.add('reminder-item');
+        reminderItem.textContent = `Reminder for ${habit.name} at ${reminder.time}`;
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', function () {
-            removeCategory(category);
+            removeReminder(reminder.id);
         });
 
-        categoryItem.appendChild(deleteButton);
-        categoryList.appendChild(categoryItem);
+        reminderItem.appendChild(deleteButton);
+        reminderList.appendChild(reminderItem);
     });
+}
+
+function updateReminderOptions() {
+    reminderHabitSelect.innerHTML = '';
+    habits.forEach(function (habit) {
+        const option = document.createElement('option');
+        option.value = habit.id;
+        option.textContent = habit.name;
+        reminderHabitSelect.appendChild(option);
+    });
+}
+
+function scheduleNotification(reminder) {
+    const [hours, minutes] = reminder.time.split(':');
+    const now = new Date();
+    const reminderTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+    if (reminderTime > now) {
+        const timeout = reminderTime - now;
+        setTimeout(function () {
+            showNotification(reminder);
+        }, timeout);
+    }
+}
+
+function showNotification(reminder) {
+    const habit = habits.find(h => h.id === reminder.habitId);
+    if (habit && Notification.permission === 'granted') {
+        new Notification(`Habit Reminder`, {
+            body: `Time to work on your habit: ${habit.name}`,
+            icon: './assets/icons/habit.png'
+        });
+    }
+}
+
+function requestNotificationPermission() {
+    if (Notification.permission !== 'granted') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                reminders.forEach(scheduleNotification);
+            }
+        });
+    }
+}
+
+function removeReminder(id) {
+    reminders = reminders.filter(reminder => reminder.id !== id);
+    updateLocalStorage();
+    renderReminders();
 }
 
 function resetProgressIfNeeded(habit) {
@@ -192,9 +262,11 @@ function removeHabit(id) {
     habits = habits.filter(function (habit) {
         return habit.id !== id;
     });
+    reminders = reminders.filter(reminder => reminder.habitId !== id); // Remove associated reminders
     updateLocalStorage();
     renderHabits();
     updateOverview();
+    renderReminders();
     updateAnalytics();
 }
 
@@ -223,6 +295,13 @@ function editHabit(id, newName, newCategory, newFrequency) {
     renderHabits();
     updateOverview();
     updateAnalytics();
+}
+
+function addCategory(name) {
+    categories.push(name);
+    updateCategoryOptions();
+    updateLocalStorage();
+    renderCategories();
 }
 
 function removeCategory(name) {
@@ -267,10 +346,13 @@ function updateAnalytics() {
 function updateLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
     localStorage.setItem('categories', JSON.stringify(categories));
+    localStorage.setItem('reminders', JSON.stringify(reminders));
 }
 
 renderHabits();
 renderCategories();
+renderReminders();
 updateCategoryOptions();
 updateOverview();
 updateAnalytics();
+requestNotificationPermission();
