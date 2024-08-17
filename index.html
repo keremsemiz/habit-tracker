@@ -9,16 +9,31 @@
 <body>
     <header>
         <h1>Habit Tracker</h1>
+        <div id="theme-switcher">Switch Theme</div>
     </header>
 
     <main>
-        <section id="habit-list">
-            <div class="habit">
-                <h2>Example Habit</h2>
-                <div class="progress">
-                </div>
+        <section id="habit-overview">
+            <h2>Habit Overview</h2>
+            <div id="overview-content">
+                <p>Total Habits: <span id="total-habits">0</span></p>
+                <p>Habits Completed Today: <span id="completed-habits">0</span></p>
+                <p>Longest Streak: <span id="longest-streak">0 days</span></p>
             </div>
         </section>
+
+        <section id="habit-list">
+            <h2>Your Habits</h2>
+            <div class="habit">
+                <h3>Example Habit</h3>
+                <div class="progress">
+                    <span class="progress-bar" style="width: 50%;"></span>
+                </div>
+                <button class="complete-btn">Mark as Complete</button>
+                <button class="remove-btn">Remove</button>
+            </div>
+        </section>
+
         <section id="add-habit">
             <h2>Add New Habit</h2>
             <form id="habit-form">
@@ -26,9 +41,17 @@
                 <button type="submit">Add Habit</button>
             </form>
         </section>
+
+        <section id="settings">
+            <h2>Settings</h2>
+            <div id="settings-content">
+                <button id="clear-data">Clear All Data</button>
+            </div>
+        </section>
     </main>
 
     <footer>
+        <p>Habit Tracker App</p>
     </footer>
 
     <script src="app.js"></script>

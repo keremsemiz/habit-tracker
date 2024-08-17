@@ -14,6 +14,11 @@ body {
 }
 
 header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
     margin-bottom: 20px;
 }
 
@@ -21,28 +26,65 @@ h1 {
     font-size: 2.5rem;
 }
 
+#theme-switcher {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
 main {
     width: 100%;
     max-width: 800px;
 }
 
-#habit-list {
+#habit-overview, #habit-list, #add-habit, #settings {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
     margin-bottom: 20px;
 }
 
 .habit {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
     margin-bottom: 10px;
 }
 
-#add-habit {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+.progress {
+    background-color: #ddd;
+    border-radius: 4px;
+    height: 20px;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    display: block;
+    height: 100%;
+    background-color: #5cb85c;
+    border-radius: 4px;
+}
+
+.complete-btn, .remove-btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.complete-btn {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.remove-btn {
+    background-color: #d9534f;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
 }
 
 #habit-form {
@@ -68,4 +110,10 @@ button {
 
 button:hover {
     background-color: #4cae4c;
+}
+
+#settings-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
