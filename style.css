@@ -107,6 +107,49 @@ body.dark-mode #theme-switcher {
     color: #fff;
 }
 
+#category-management, #reminders {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#category-form, #reminder-content {
+    display: flex;
+    flex-direction: column;
+}
+
+#new-category {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#category-list {
+    margin-top: 10px;
+}
+
+#category-list .category-item {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.category-item button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    cursor: pointer;
+}
+
+.category-item button:hover {
+    background-color: #c9302c;
+}
+
 
 button {
     padding: 10px;

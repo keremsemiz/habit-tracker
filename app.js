@@ -11,7 +11,12 @@ const editHabitSection = document.getElementById('edit-habit');
 const cancelEditBtn = document.getElementById('cancel-edit');
 const themeSwitcher = document.getElementById('theme-switcher');
 const analyticsContent = document.getElementById('analytics-content');
+const categoryForm = document.getElementById('category-form');
+const newCategoryInput = document.getElementById('new-category');
+const categoryList = document.getElementById('category-list');
+const reminderContent = document.getElementById('reminder-content');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
+let categories = JSON.parse(localStorage.getItem('categories')) || ['health', 'productivity', 'learning'];
 let habitToEdit = null;
 
 habitForm.addEventListener('submit', function (event) {
@@ -44,6 +49,15 @@ cancelEditBtn.addEventListener('click', function () {
     habitForm.style.display = 'block';
 });
 
+categoryForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const newCategory = newCategoryInput.value.trim();
+    if (newCategory !== '') {
+        addCategory(newCategory);
+        newCategoryInput.value = '';
+    }
+});
+
 themeSwitcher.addEventListener('click', function () {
     document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
@@ -66,6 +80,13 @@ function addHabit(name, category, frequency) {
     renderHabits();
     updateOverview();
     updateAnalytics();
+}
+
+function addCategory(name) {
+    categories.push(name);
+    updateCategoryOptions();
+    updateLocalStorage();
+    renderCategories();
 }
 
 function renderHabits() {
@@ -114,6 +135,24 @@ function renderHabits() {
         habitDiv.appendChild(removeButton);
 
         habitList.appendChild(habitDiv);
+    });
+}
+
+function renderCategories() {
+    categoryList.innerHTML = '';
+    categories.forEach(function (category) {
+        const categoryItem = document.createElement('div');
+        categoryItem.classList.add('category-item');
+        categoryItem.textContent = category;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', function () {
+            removeCategory(category);
+        });
+
+        categoryItem.appendChild(deleteButton);
+        categoryList.appendChild(categoryItem);
     });
 }
 
@@ -186,6 +225,25 @@ function editHabit(id, newName, newCategory, newFrequency) {
     updateAnalytics();
 }
 
+function removeCategory(name) {
+    categories = categories.filter(category => category !== name);
+    updateCategoryOptions();
+    updateLocalStorage();
+    renderCategories();
+}
+
+function updateCategoryOptions() {
+    habitCategorySelect.innerHTML = '';
+    editHabitCategorySelect.innerHTML = '';
+    categories.forEach(function (category) {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        habitCategorySelect.appendChild(option);
+        editHabitCategorySelect.appendChild(option);
+    });
+}
+
 function updateOverview() {
     const totalHabits = habits.length;
     const completedHabits = habits.filter(habit => habit.completed).length;
@@ -208,8 +266,11 @@ function updateAnalytics() {
 
 function updateLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
+    localStorage.setItem('categories', JSON.stringify(categories));
 }
 
 renderHabits();
+renderCategories();
+updateCategoryOptions();
 updateOverview();
 updateAnalytics();
