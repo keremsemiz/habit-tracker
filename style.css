@@ -39,7 +39,19 @@ main {
     max-width: 800px;
 }
 
-#habit-overview, #habit-list, #add-habit, #settings {
+#habit-overview {
+    background-color: #eef;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#habit-overview p {
+    margin: 5px 0;
+}
+
+
+#habit-list, #add-habit, #settings {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

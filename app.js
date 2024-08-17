@@ -2,6 +2,9 @@ const habitForm = document.getElementById('habit-form');
 const habitNameInput = document.getElementById('habit-name');
 const habitFrequencySelect = document.getElementById('habit-frequency');
 const habitList = document.getElementById('habit-list');
+const totalHabitsEl = document.getElementById('total-habits');
+const completedHabitsEl = document.getElementById('completed-habits');
+const longestStreakEl = document.getElementById('longest-streak');
 let habits = JSON.parse(localStorage.getItem('habits')) || [];
 
 habitForm.addEventListener('submit', function (event) {
@@ -21,11 +24,14 @@ function addHabit(name, frequency) {
         frequency: frequency,
         completed: false,
         progress: 0,
-        lastUpdated: new Date().toISOString().split('T')[0] // Store only the date
+        streak: 0,
+        longestStreak: 0,
+        lastUpdated: new Date().toISOString().split('T')[0] 
     };
     habits.push(habit);
     updateLocalStorage();
     renderHabits();
+    updateOverview();
 }
 
 function renderHabits() {
@@ -85,12 +91,19 @@ function markHabitComplete(id) {
         if (habit.id === id) {
             habit.progress = Math.min(habit.progress + 25, 100);
             habit.completed = habit.progress === 100;
+            if (habit.completed) {
+                habit.streak += 1;
+                if (habit.streak > habit.longestStreak) {
+                    habit.longestStreak = habit.streak;
+                }
+            }
             habit.lastUpdated = new Date().toISOString().split('T')[0];
         }
         return habit;
     });
     updateLocalStorage();
     renderHabits();
+    updateOverview();
 }
 
 function removeHabit(id) {
@@ -99,6 +112,17 @@ function removeHabit(id) {
     });
     updateLocalStorage();
     renderHabits();
+    updateOverview();
+}
+
+function updateOverview() {
+    const totalHabits = habits.length;
+    const completedHabits = habits.filter(habit => habit.completed).length;
+    const longestStreak = Math.max(...habits.map(habit => habit.longestStreak), 0);
+
+    totalHabitsEl.textContent = totalHabits;
+    completedHabitsEl.textContent = completedHabits;
+    longestStreakEl.textContent = `${longestStreak} days`;
 }
 
 function updateLocalStorage() {
@@ -106,3 +130,4 @@ function updateLocalStorage() {
 }
 
 renderHabits();
+updateOverview();
