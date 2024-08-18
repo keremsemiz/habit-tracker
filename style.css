@@ -53,6 +53,15 @@ input, select {
     padding: 10px;
 }
 
+.habit .badge {
+    background-color: #ff9800;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
+    font-size: 0.8rem;
+}
+
 #habit-overview {
     background-color: #eef;
     padding: 15px;

@@ -164,6 +164,13 @@ function renderHabits(filter = 'all') {
 
             const habitTitle = document.createElement('h3');
             habitTitle.textContent = `${habit.name} (${habit.category})`;
+            
+            if (habit.streak >= 10) {
+                const badge = document.createElement('span');
+                badge.classList.add('badge');
+                badge.textContent = `🔥 Streak: ${habit.streak}`;
+                habitTitle.appendChild(badge);
+            }
 
             const progressDiv = document.createElement('div');
             progressDiv.classList.add('progress');
@@ -198,6 +205,7 @@ function renderHabits(filter = 'all') {
         });
     updateReminderOptions();
 }
+
 
 
 function renderCategories() {
