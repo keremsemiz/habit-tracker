@@ -175,7 +175,6 @@ button#cancel-edit {
     }
 }
 
-/* Dark Mode */
 body.light-mode {
     background-color: #f4f4f4;
     color: #333;
@@ -189,4 +188,48 @@ body.dark-mode {
 body.dark-mode #theme-switcher {
     background-color: #555;
     color: #fff;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    #theme-switcher {
+        margin-top: 10px;
+    }
+
+    .habit, .category-item, .reminder-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .progress {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
 }

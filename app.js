@@ -23,46 +23,52 @@ let categories = JSON.parse(localStorage.getItem('categories')) || ['health', 'p
 let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
 let habitToEdit = null;
 
-habitForm.addEventListener('submit', function (event) {
+document.addEventListener('DOMContentLoaded', () => {
+    renderHabits();
+    renderCategories();
+    renderReminders();
+    updateCategoryOptions();
+    updateOverview();
+    updateAnalytics();
+    requestNotificationPermission();
+});
+
+habitForm.addEventListener('submit', handleHabitSubmit);
+editHabitForm.addEventListener('submit', handleEditHabitSubmit);
+cancelEditBtn.addEventListener('click', cancelEdit);
+categoryForm.addEventListener('submit', handleCategorySubmit);
+reminderForm.addEventListener('submit', handleReminderSubmit);
+themeSwitcher.addEventListener('click', toggleTheme);
+
+function handleHabitSubmit(event) {
     event.preventDefault();
     const habitName = habitNameInput.value.trim();
-    const habitCategory = habitCategorySelect.value;
-    const habitFrequency = habitFrequencySelect.value;
-    if (habitName !== '') {
-        addHabit(habitName, habitCategory, habitFrequency);
+    if (habitName) {
+        addHabit(habitName, habitCategorySelect.value, habitFrequencySelect.value);
         habitNameInput.value = '';
     }
-});
+}
 
-editHabitForm.addEventListener('submit', function (event) {
+function handleEditHabitSubmit(event) {
     event.preventDefault();
     const newName = editHabitNameInput.value.trim();
-    const newCategory = editHabitCategorySelect.value;
-    const newFrequency = editHabitFrequencySelect.value;
-    if (newName !== '' && habitToEdit !== null) {
-        editHabit(habitToEdit, newName, newCategory, newFrequency);
+    if (newName && habitToEdit) {
+        editHabit(habitToEdit, newName, editHabitCategorySelect.value, editHabitFrequencySelect.value);
         habitToEdit = null;
-        editHabitSection.style.display = 'none';
-        habitForm.style.display = 'block';
+        toggleEditSection(false);
     }
-});
+}
 
-cancelEditBtn.addEventListener('click', function () {
-    habitToEdit = null;
-    editHabitSection.style.display = 'none';
-    habitForm.style.display = 'block';
-});
-
-categoryForm.addEventListener('submit', function (event) {
+function handleCategorySubmit(event) {
     event.preventDefault();
     const newCategory = newCategoryInput.value.trim();
-    if (newCategory !== '') {
+    if (newCategory) {
         addCategory(newCategory);
         newCategoryInput.value = '';
     }
-});
+}
 
-reminderForm.addEventListener('submit', function (event) {
+function handleReminderSubmit(event) {
     event.preventDefault();
     const habitId = reminderHabitSelect.value;
     const reminderTime = reminderTimeInput.value;
@@ -71,24 +77,34 @@ reminderForm.addEventListener('submit', function (event) {
         addReminder(habitId, reminderTime, reminderFrequency);
         reminderTimeInput.value = '';
     }
-});
+}
 
-themeSwitcher.addEventListener('click', function () {
+function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
-});
+}
+
+function cancelEdit() {
+    habitToEdit = null;
+    toggleEditSection(false);
+}
+
+function toggleEditSection(show) {
+    editHabitSection.style.display = show ? 'block' : 'none';
+    habitForm.style.display = show ? 'none' : 'block';
+}
 
 function addHabit(name, category, frequency) {
     const habit = {
         id: Date.now(),
-        name: name,
-        category: category,
-        frequency: frequency,
+        name,
+        category,
+        frequency,
         completed: false,
         progress: 0,
         streak: 0,
         longestStreak: 0,
-        lastUpdated: new Date().toISOString().split('T')[0]
+        lastUpdated: new Date().toISOString().split('T')[0],
     };
     habits.push(habit);
     updateLocalStorage();
@@ -98,12 +114,31 @@ function addHabit(name, category, frequency) {
     updateReminderOptions();
 }
 
+function editHabit(id, newName, newCategory, newFrequency) {
+    habits = habits.map(habit => 
+        habit.id === id
+            ? { ...habit, name: newName, category: newCategory, frequency: newFrequency }
+            : habit
+    );
+    updateLocalStorage();
+    renderHabits();
+    updateOverview();
+    updateAnalytics();
+}
+
+function addCategory(name) {
+    categories.push(name);
+    updateCategoryOptions();
+    updateLocalStorage();
+    renderCategories();
+}
+
 function addReminder(habitId, time, frequency) {
     const reminder = {
         id: Date.now(),
-        habitId: habitId,
-        time: time,
-        frequency: frequency
+        habitId,
+        time,
+        frequency,
     };
     reminders.push(reminder);
     updateLocalStorage();
@@ -113,7 +148,7 @@ function addReminder(habitId, time, frequency) {
 
 function renderHabits() {
     habitList.innerHTML = '';
-    habits.forEach(function (habit) {
+    habits.forEach(habit => {
         resetProgressIfNeeded(habit);
         const habitDiv = document.createElement('div');
         habitDiv.classList.add('habit');
@@ -126,28 +161,22 @@ function renderHabits() {
 
         const progressBar = document.createElement('span');
         progressBar.classList.add('progress-bar');
-        progressBar.style.width = habit.progress + '%';
+        progressBar.style.width = `${habit.progress}%`;
 
         const completeButton = document.createElement('button');
         completeButton.textContent = 'Mark as Complete';
         completeButton.classList.add('complete-btn');
-        completeButton.addEventListener('click', function () {
-            markHabitComplete(habit.id);
-        });
+        completeButton.addEventListener('click', () => markHabitComplete(habit.id));
 
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.classList.add('edit-btn');
-        editButton.addEventListener('click', function () {
-            startEditHabit(habit.id);
-        });
+        editButton.addEventListener('click', () => startEditHabit(habit.id));
 
         const removeButton = document.createElement('button');
         removeButton.textContent = 'Remove';
         removeButton.classList.add('remove-btn');
-        removeButton.addEventListener('click', function () {
-            removeHabit(habit.id);
-        });
+        removeButton.addEventListener('click', () => removeHabit(habit.id));
 
         progressDiv.appendChild(progressBar);
         habitDiv.appendChild(habitTitle);
@@ -161,9 +190,25 @@ function renderHabits() {
     updateReminderOptions();
 }
 
+function renderCategories() {
+    categoryList.innerHTML = '';
+    categories.forEach(category => {
+        const categoryItem = document.createElement('div');
+        categoryItem.classList.add('category-item');
+        categoryItem.textContent = category;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => removeCategory(category));
+
+        categoryItem.appendChild(deleteButton);
+        categoryList.appendChild(categoryItem);
+    });
+}
+
 function renderReminders() {
     reminderList.innerHTML = '';
-    reminders.forEach(function (reminder) {
+    reminders.forEach(reminder => {
         const habit = habits.find(h => h.id === reminder.habitId);
         const reminderItem = document.createElement('div');
         reminderItem.classList.add('reminder-item');
@@ -171,9 +216,7 @@ function renderReminders() {
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', function () {
-            removeReminder(reminder.id);
-        });
+        deleteButton.addEventListener('click', () => removeReminder(reminder.id));
 
         reminderItem.appendChild(deleteButton);
         reminderList.appendChild(reminderItem);
@@ -182,7 +225,7 @@ function renderReminders() {
 
 function updateReminderOptions() {
     reminderHabitSelect.innerHTML = '';
-    habits.forEach(function (habit) {
+    habits.forEach(habit => {
         const option = document.createElement('option');
         option.value = habit.id;
         option.textContent = habit.name;
@@ -190,56 +233,72 @@ function updateReminderOptions() {
     });
 }
 
-function scheduleNotification(reminder) {
-    const [hours, minutes] = reminder.time.split(':');
-    const now = new Date();
-    const reminderTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+function updateOverview() {
+    const totalHabits = habits.length;
+    const completedHabits = habits.filter(habit => habit.completed).length;
+    const longestStreak = Math.max(...habits.map(habit => habit.longestStreak), 0);
 
-    if (reminderTime > now) {
-        const timeout = reminderTime - now;
-        setTimeout(function () {
-            showNotification(reminder);
-            if (reminder.frequency === 'daily' || reminder.frequency === 'weekly') {
-                scheduleRecurringNotification(reminder);
+    document.getElementById('total-habits').textContent = totalHabits;
+    document.getElementById('completed-habits').textContent = completedHabits;
+    document.getElementById('longest-streak').textContent = `${longestStreak} days`;
+}
+
+function updateAnalytics() {
+    const healthCompleted = habits.filter(habit => habit.completed && habit.category === 'health').length;
+    const productivityCompleted = habits.filter(habit => habit.completed && habit.category === 'productivity').length;
+    const learningCompleted = habits.filter(habit => habit.completed && habit.category === 'learning').length;
+
+    document.getElementById('health-completed').textContent = healthCompleted;
+    document.getElementById('productivity-completed').textContent = productivityCompleted;
+    document.getElementById('learning-completed').textContent = learningCompleted;
+}
+
+function resetProgressIfNeeded(habit) {
+    const today = new Date().toISOString().split('T')[0];
+    if (habit.lastUpdated !== today) {
+        const resetCondition = habit.frequency === 'daily' || (habit.frequency === 'weekly' && new Date(habit.lastUpdated) < new Date(today).setDate(new Date(today).getDate() - 7));
+        if (resetCondition) {
+            habit.progress = 0;
+            habit.completed = false;
+            habit.lastUpdated = today;
+        }
+    }
+}
+
+function markHabitComplete(id) {
+    habits = habits.map(habit => {
+        if (habit.id === id) {
+            habit.progress = Math.min(habit.progress + 25, 100);
+            habit.completed = habit.progress === 100;
+            if (habit.completed) {
+                habit.streak += 1;
+                habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
             }
-        }, timeout);
-    }
+            habit.lastUpdated = new Date().toISOString().split('T')[0];
+        }
+        return habit;
+    });
+    updateLocalStorage();
+    renderHabits();
+    updateOverview();
+    updateAnalytics();
 }
 
-function scheduleRecurringNotification(reminder) {
-    const [hours, minutes] = reminder.time.split(':');
-    let interval = 0;
-    if (reminder.frequency === 'daily') {
-        interval = 24 * 60 * 60 * 1000;
-    } else if (reminder.frequency === 'weekly') {
-        interval = 7 * 24 * 60 * 60 * 1000;
-    }
-
-    if (interval > 0) {
-        setInterval(function () {
-            showNotification(reminder);
-        }, interval);
-    }
+function removeHabit(id) {
+    habits = habits.filter(habit => habit.id !== id);
+    reminders = reminders.filter(reminder => reminder.habitId !== id);
+    updateLocalStorage();
+    renderHabits();
+    updateOverview();
+    renderReminders();
+    updateAnalytics();
 }
 
-function showNotification(reminder) {
-    const habit = habits.find(h => h.id === reminder.habitId);
-    if (habit && Notification.permission === 'granted') {
-        new Notification(`Habit Reminder`, {
-            body: `Time to work on your habit: ${habit.name}`,
-            icon: '/assets/icons/habit.png'
-        });
-    }
-}
-
-function requestNotificationPermission() {
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-                reminders.forEach(scheduleNotification);
-            }
-        });
-    }
+function removeCategory(name) {
+    categories = categories.filter(category => category !== name);
+    updateCategoryOptions();
+    updateLocalStorage();
+    renderCategories();
 }
 
 function removeReminder(id) {
@@ -258,95 +317,51 @@ function removeReminder(id) {
     }
 }
 
-function resetProgressIfNeeded(habit) {
-    const today = new Date().toISOString().split('T')[0];
-    if (habit.lastUpdated !== today) {
-        if (habit.frequency === 'daily' || (habit.frequency === 'weekly' && new Date(habit.lastUpdated) < new Date(today).setDate(new Date(today).getDate() - 7))) {
-            habit.progress = 0;
-            habit.completed = false;
-            habit.lastUpdated = today;
-        }
-    }
-}
+function scheduleNotification(reminder) {
+    const [hours, minutes] = reminder.time.split(':');
+    const now = new Date();
+    const reminderTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
 
-function markHabitComplete(id) {
-    habits = habits.map(function (habit) {
-        if (habit.id === id) {
-            habit.progress = Math.min(habit.progress + 25, 100);
-            habit.completed = habit.progress === 100;
-            if (habit.completed) {
-                habit.streak += 1;
-                if (habit.streak > habit.longestStreak) {
-                    habit.longestStreak = habit.streak;
-                }
+    if (reminderTime > now) {
+        const timeout = reminderTime - now;
+        setTimeout(() => {
+            showNotification(reminder);
+            if (reminder.frequency === 'daily' || reminder.frequency === 'weekly') {
+                scheduleRecurringNotification(reminder);
             }
-            habit.lastUpdated = new Date().toISOString().split('T')[0];
-        }
-        return habit;
-    });
-    updateLocalStorage();
-    renderHabits();
-    updateOverview();
-    updateAnalytics();
-}
-
-function removeHabit(id) {
-    habits = habits.filter(function (habit) {
-        return habit.id !== id;
-    });
-    reminders = reminders.filter(reminder => reminder.habitId !== id); 
-    updateLocalStorage();
-    renderHabits();
-    updateOverview();
-    renderReminders();
-    updateAnalytics();
-}
-
-function startEditHabit(id) {
-    const habit = habits.find(habit => habit.id === id);
-    if (habit) {
-        habitToEdit = id;
-        editHabitNameInput.value = habit.name;
-        editHabitCategorySelect.value = habit.category;
-        editHabitFrequencySelect.value = habit.frequency;
-        editHabitSection.style.display = 'block';
-        habitForm.style.display = 'none';
+        }, timeout);
     }
 }
 
-function editHabit(id, newName, newCategory, newFrequency) {
-    habits = habits.map(function (habit) {
-        if (habit.id === id) {
-            habit.name = newName;
-            habit.category = newCategory;
-            habit.frequency = newFrequency;
-        }
-        return habit;
-    });
-    updateLocalStorage();
-    renderHabits();
-    updateOverview();
-    updateAnalytics();
+function scheduleRecurringNotification(reminder) {
+    const interval = reminder.frequency === 'daily' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    setInterval(() => showNotification(reminder), interval);
 }
 
-function addCategory(name) {
-    categories.push(name);
-    updateCategoryOptions();
-    updateLocalStorage();
-    renderCategories();
+function showNotification(reminder) {
+    const habit = habits.find(h => h.id === reminder.habitId);
+    if (habit && Notification.permission === 'granted') {
+        new Notification(`Habit Reminder`, {
+            body: `Time to work on your habit: ${habit.name}`,
+            icon: 'path/to/icon.png'
+        });
+    }
 }
 
-function removeCategory(name) {
-    categories = categories.filter(category => category !== name);
-    updateCategoryOptions();
-    updateLocalStorage();
-    renderCategories();
+function requestNotificationPermission() {
+    if (Notification.permission !== 'granted') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                reminders.forEach(scheduleNotification);
+            }
+        });
+    }
 }
 
 function updateCategoryOptions() {
     habitCategorySelect.innerHTML = '';
     editHabitCategorySelect.innerHTML = '';
-    categories.forEach(function (category) {
+    categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category;
         option.textContent = category;
@@ -355,36 +370,8 @@ function updateCategoryOptions() {
     });
 }
 
-function updateOverview() {
-    const totalHabits = habits.length;
-    const completedHabits = habits.filter(habit => habit.completed).length;
-    const longestStreak = Math.max(...habits.map(habit => habit.longestStreak), 0);
-
-    totalHabitsEl.textContent = totalHabits;
-    completedHabitsEl.textContent = completedHabits;
-    longestStreakEl.textContent = `${longestStreak} days`;
-}
-
-function updateAnalytics() {
-    const healthCompleted = habits.filter(habit => habit.completed && habit.category === 'health').length;
-    const productivityCompleted = habits.filter(habit => habit.completed && habit.category === 'productivity').length;
-    const learningCompleted = habits.filter(habit => habit.completed && habit.category === 'learning').length;
-
-    document.getElementById('health-completed').textContent = healthCompleted;
-    document.getElementById('productivity-completed').textContent = productivityCompleted;
-    document.getElementById('learning-completed').textContent = learningCompleted;
-}
-
 function updateLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
     localStorage.setItem('categories', JSON.stringify(categories));
     localStorage.setItem('reminders', JSON.stringify(reminders));
 }
-
-renderHabits();
-renderCategories();
-renderReminders();
-updateCategoryOptions();
-updateOverview();
-updateAnalytics();
-requestNotificationPermission();
