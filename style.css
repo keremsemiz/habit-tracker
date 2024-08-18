@@ -39,7 +39,20 @@ main {
     max-width: 800px;
 }
 
-/* Habit Overview */
+.habit, .category-item, .reminder-item {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    border-radius: 6px;
+}
+
+input, select {
+    border-radius: 4px;
+    padding: 10px;
+}
+
 #habit-overview {
     background-color: #eef;
     padding: 15px;
@@ -174,20 +187,52 @@ button#cancel-edit {
         opacity: 1;
     }
 }
-
 body.light-mode {
     background-color: #f4f4f4;
     color: #333;
 }
 
 body.dark-mode {
-    background-color: #333;
-    color: #f4f4f4;
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
 body.dark-mode #theme-switcher {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .habit, body.dark-mode .category-item, body.dark-mode .reminder-item {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+body.dark-mode .progress {
+    background-color: #333;
+}
+
+body.dark-mode .progress-bar {
+    background-color: #4caf50;
+}
+
+body.dark-mode button {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-mode button:hover {
     background-color: #555;
-    color: #fff;
+}
+
+body.dark-mode input, body.dark-mode select {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-mode h1, body.dark-mode h2 {
+    color: #e0e0e0;
 }
 
 @media (max-width: 768px) {
