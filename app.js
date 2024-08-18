@@ -146,49 +146,59 @@ function addReminder(habitId, time, frequency) {
     scheduleNotification(reminder);
 }
 
-function renderHabits() {
+const filterCategorySelect = document.getElementById('filter-category');
+
+filterCategorySelect.addEventListener('change', () => {
+    const selectedCategory = filterCategorySelect.value;
+    renderHabits(selectedCategory);
+});
+
+function renderHabits(filter = 'all') {
     habitList.innerHTML = '';
-    habits.forEach(habit => {
-        resetProgressIfNeeded(habit);
-        const habitDiv = document.createElement('div');
-        habitDiv.classList.add('habit');
+    habits
+        .filter(habit => filter === 'all' || habit.category === filter)
+        .forEach(habit => {
+            resetProgressIfNeeded(habit);
+            const habitDiv = document.createElement('div');
+            habitDiv.classList.add('habit');
 
-        const habitTitle = document.createElement('h3');
-        habitTitle.textContent = `${habit.name} (${habit.category})`;
+            const habitTitle = document.createElement('h3');
+            habitTitle.textContent = `${habit.name} (${habit.category})`;
 
-        const progressDiv = document.createElement('div');
-        progressDiv.classList.add('progress');
+            const progressDiv = document.createElement('div');
+            progressDiv.classList.add('progress');
 
-        const progressBar = document.createElement('span');
-        progressBar.classList.add('progress-bar');
-        progressBar.style.width = `${habit.progress}%`;
+            const progressBar = document.createElement('span');
+            progressBar.classList.add('progress-bar');
+            progressBar.style.width = `${habit.progress}%`;
 
-        const completeButton = document.createElement('button');
-        completeButton.textContent = 'Mark as Complete';
-        completeButton.classList.add('complete-btn');
-        completeButton.addEventListener('click', () => markHabitComplete(habit.id));
+            const completeButton = document.createElement('button');
+            completeButton.textContent = 'Mark as Complete';
+            completeButton.classList.add('complete-btn');
+            completeButton.addEventListener('click', () => markHabitComplete(habit.id));
 
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.classList.add('edit-btn');
-        editButton.addEventListener('click', () => startEditHabit(habit.id));
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.classList.add('edit-btn');
+            editButton.addEventListener('click', () => startEditHabit(habit.id));
 
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'Remove';
-        removeButton.classList.add('remove-btn');
-        removeButton.addEventListener('click', () => removeHabit(habit.id));
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.classList.add('remove-btn');
+            removeButton.addEventListener('click', () => removeHabit(habit.id));
 
-        progressDiv.appendChild(progressBar);
-        habitDiv.appendChild(habitTitle);
-        habitDiv.appendChild(progressDiv);
-        habitDiv.appendChild(completeButton);
-        habitDiv.appendChild(editButton);
-        habitDiv.appendChild(removeButton);
+            progressDiv.appendChild(progressBar);
+            habitDiv.appendChild(habitTitle);
+            habitDiv.appendChild(progressDiv);
+            habitDiv.appendChild(completeButton);
+            habitDiv.appendChild(editButton);
+            habitDiv.appendChild(removeButton);
 
-        habitList.appendChild(habitDiv);
-    });
+            habitList.appendChild(habitDiv);
+        });
     updateReminderOptions();
 }
+
 
 function renderCategories() {
     categoryList.innerHTML = '';
@@ -273,6 +283,7 @@ function markHabitComplete(id) {
             if (habit.completed) {
                 habit.streak += 1;
                 habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
+                checkStreakMilestone(habit.streak, habit.name);
             }
             habit.lastUpdated = new Date().toISOString().split('T')[0];
         }
@@ -283,6 +294,14 @@ function markHabitComplete(id) {
     updateOverview();
     updateAnalytics();
 }
+
+function checkStreakMilestone(streak, habitName) {
+    const milestones = [5, 10, 20, 50, 100];
+    if (milestones.includes(streak)) {
+        alert(`Congratulations! You've reached a streak of ${streak} days on your habit: ${habitName}. Keep up the great work!`);
+    }
+}
+
 
 function removeHabit(id) {
     habits = habits.filter(habit => habit.id !== id);
