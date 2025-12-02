@@ -287,3 +287,59 @@ body.dark-mode h1, body.dark-mode h2 {
         padding: 8px;
     }
 }
+/* =========================
+   Dark Mode & Streak styles
+   ========================= */
+
+body.dark {
+  background-color: #121212;
+  color: #eaeaea;
+}
+
+.container.dark {
+  background-color: #181818;
+}
+
+.habit.dark {
+  background-color: #232323;
+  border: 1px solid #3a3a3a;
+}
+
+.toggle-btn {
+  float: right;
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: 10px;
+}
+
+/* Streak */
+.streak {
+  margin-top: 6px;
+  font-weight: 600;
+  color: orange;
+  font-size: 0.95rem;
+}
+/* Streak display */
+.streak {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: orange;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* small badge style (if you want it slightly distinct) */
+.badge {
+  background: linear-gradient(90deg, #ffb347, #ffcc33);
+  color: #111;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  margin-left: 8px;
+  font-size: 0.8rem;
+}
