@@ -28,10 +28,13 @@ h1 {
 
 #theme-switcher {
     cursor: pointer;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 10px 15px;
+    border: 2px solid #ccc;
+    border-radius: 25px;
     background-color: #fff;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    user-select: none;
 }
 
 main {
@@ -63,11 +66,12 @@ input, select {
 }
 
 #habit-overview {
-    background-color: #eef;
+    background-color: #e3f2fd;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    border: 1px solid #bbdefb;
 }
 
 #habit-overview p {
@@ -87,12 +91,27 @@ input, select {
     flex-direction: column;
 }
 
-#habit-name, #edit-habit-name, #habit-category, #edit-habit-category, #habit-frequency, #edit-habit-frequency, #reminder-habit, #reminder-time, #reminder-frequency, #new-category {
+#habit-name, #edit-habit-name, #habit-category, #edit-habit-category, #habit-frequency, #edit-habit-frequency, #reminder-habit, #reminder-time, #reminder-frequency, #new-category, #filter-category {
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     background-color: #fff;
+    color: #333;
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+select#habit-category, select#edit-habit-category, select#habit-frequency, select#edit-habit-frequency, select#reminder-habit, select#reminder-frequency, select#filter-category {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1.5em 1.5em;
+    padding-right: 40px;
 }
 
 button {
@@ -115,10 +134,38 @@ button#cancel-edit {
     margin-top: 10px;
 }
 
-#category-list .category-item, #reminder-list .reminder-item {
+#category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#category-list .category-item {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 10px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#category-list .category-item:hover {
+    background-color: #bbdefb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#reminder-list .reminder-item {
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
     transition: opacity 0.5s ease;
 }
 
@@ -126,16 +173,18 @@ button#cancel-edit {
     opacity: 0;
 }
 
-.category-item button, .reminder-item button {
-    padding: 5px 10px;
+#category-list .category-item button, .reminder-item button {
+    padding: 5px 8px;
     border-radius: 4px;
     border: none;
     background-color: #d9534f;
     color: white;
     cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease;
 }
 
-.category-item button:hover, .reminder-item button:hover {
+#category-list .category-item button:hover, .reminder-item button:hover {
     background-color: #c9302c;
 }
 
@@ -154,6 +203,8 @@ button#cancel-edit {
     border-radius: 4px;
     height: 20px;
     margin-top: 5px;
+    position: relative;
+    overflow: hidden;
 }
 
 .progress-bar {
@@ -161,6 +212,18 @@ button#cancel-edit {
     height: 100%;
     background-color: #5cb85c;
     border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #333;
+    z-index: 1;
 }
 
 .complete-btn, .edit-btn, .remove-btn {
@@ -169,6 +232,7 @@ button#cancel-edit {
     border-radius: 4px;
     border: none;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .complete-btn {
@@ -176,10 +240,26 @@ button#cancel-edit {
     color: white;
 }
 
+.complete-btn:hover:not(:disabled) {
+    background-color: #4cae4c;
+    transform: translateY(-2px);
+}
+
+.complete-btn:disabled {
+    background-color: #7cb87c;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .edit-btn {
     background-color: #f0ad4e;
     color: white;
     margin-left: 5px;
+}
+
+.edit-btn:hover {
+    background-color: #ec971f;
+    transform: translateY(-2px);
 }
 
 .remove-btn {
@@ -209,15 +289,53 @@ body.dark-mode {
 body.dark-mode #theme-switcher {
     background-color: #333;
     color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode #theme-switcher:hover {
+    background-color: #444;
+    border-color: #777;
+}
+
+body.dark-mode #habit-overview {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #333;
+}
+
+body.dark-mode #habit-overview p {
+    color: #e0e0e0;
 }
 
 body.dark-mode .habit, body.dark-mode .category-item, body.dark-mode .reminder-item {
     background-color: #1e1e1e;
     border: 1px solid #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode #category-list .category-item {
+    background-color: #1565c0;
+    color: #e3f2fd;
+    border: 1px solid #1976d2;
+}
+
+body.dark-mode #category-list .category-item:hover {
+    background-color: #1976d2;
+    border-color: #42a5f5;
+}
+
+body.dark-mode #reminder-list .reminder-item {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #444;
 }
 
 body.dark-mode .progress {
     background-color: #333;
+}
+
+body.dark-mode .progress-text {
+    color: #e0e0e0;
 }
 
 body.dark-mode .progress-bar {
@@ -240,8 +358,30 @@ body.dark-mode input, body.dark-mode select {
     border: 1px solid #555;
 }
 
+body.dark-mode select#habit-category, body.dark-mode select#edit-habit-category, body.dark-mode select#habit-frequency, body.dark-mode select#edit-habit-frequency, body.dark-mode select#reminder-habit, body.dark-mode select#reminder-frequency, body.dark-mode select#filter-category {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
 body.dark-mode h1, body.dark-mode h2 {
     color: #e0e0e0;
+}
+
+body.dark-mode h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode p {
+    color: #e0e0e0;
+}
+
+body.dark-mode section {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode #add-habit, body.dark-mode #edit-habit, body.dark-mode #settings, body.dark-mode #analytics, body.dark-mode #category-management, body.dark-mode #reminders {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
 }
 
 @media (max-width: 768px) {
@@ -286,4 +426,78 @@ body.dark-mode h1, body.dark-mode h2 {
         font-size: 0.9rem;
         padding: 8px;
     }
+}
+
+/* High-contrast overrides for dark mode to ensure readability */
+body.dark-mode section,
+body.dark-mode main,
+body.dark-mode header,
+body.dark-mode footer,
+body.dark-mode #habit-list,
+body.dark-mode #category-management,
+body.dark-mode #reminders,
+body.dark-mode #analytics,
+body.dark-mode #add-habit,
+body.dark-mode #edit-habit,
+body.dark-mode #settings {
+    background-color: #121212 !important;
+    color: #e6e6e6 !important;
+    border-color: #222 !important;
+}
+
+body.dark-mode #habit-overview {
+    background-color: #161616 !important;
+    color: #ffffff !important;
+    border: 1px solid #222 !important;
+}
+
+body.dark-mode #habit-overview p,
+body.dark-mode #overview-content p,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode p,
+body.dark-mode span {
+    color: #e6e6e6 !important;
+}
+
+/* Make category badges readable in dark mode */
+body.dark-mode #category-list .category-item {
+    background-color: #0f4a78 !important;
+    color: #f1f9ff !important;
+    border: 1px solid #174f86 !important;
+}
+
+/* Ensure progress label and bar are readable */
+body.dark-mode .progress {
+    background-color: #222 !important;
+}
+
+body.dark-mode .progress-bar {
+    background-color: #4caf50 !important;
+}
+
+body.dark-mode .progress-text {
+    color: #ffffff !important;
+}
+
+/* Inputs, selects and buttons */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select,
+body.dark-mode button {
+    background-color: #1a1a1a !important;
+    color: #e6e6e6 !important;
+    border: 1px solid #333 !important;
+}
+
+/* Accent/badge adjustments */
+body.dark-mode .badge,
+body.dark-mode .habit .badge {
+    background-color: #ff8a00 !important;
+    color: #fff !important;
+}
+
+/* Ensure the theme switcher glyph remains visible */
+body.dark-mode #theme-switcher {
+    color: #ffd54f !important;
 }

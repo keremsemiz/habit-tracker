@@ -24,6 +24,7 @@ let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
 let habitToEdit = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     renderHabits();
     renderCategories();
     renderReminders();
@@ -31,6 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOverview();
     updateAnalytics();
     requestNotificationPermission();
+    const clearDataBtn = document.getElementById('clear-data');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', clearAllData);
+    }
 });
 
 habitForm.addEventListener('submit', handleHabitSubmit);
@@ -80,13 +85,43 @@ function handleReminderSubmit(event) {
 }
 
 function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    updateThemeSwitcherIcon();
+}
+
+function updateThemeSwitcherIcon() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    themeSwitcher.textContent = isDarkMode ? '☀️' : '🌙';
+}
+
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+    }
+    updateThemeSwitcherIcon();
 }
 
 function cancelEdit() {
     habitToEdit = null;
     toggleEditSection(false);
+}
+
+function startEditHabit(id) {
+    habitToEdit = id;
+    const habit = habits.find(h => h.id === id);
+    if (habit) {
+        editHabitNameInput.value = habit.name;
+        editHabitCategorySelect.value = habit.category;
+        editHabitFrequencySelect.value = habit.frequency;
+        toggleEditSection(true);
+    }
 }
 
 function toggleEditSection(show) {
@@ -165,10 +200,15 @@ function renderHabits(filter = 'all') {
             const habitTitle = document.createElement('h3');
             habitTitle.textContent = `${habit.name} (${habit.category})`;
             
-            if (habit.streak >= 10) {
+            // Show streak badge for all habits with active streak
+            if (habit.streak > 0) {
                 const badge = document.createElement('span');
                 badge.classList.add('badge');
-                badge.textContent = `🔥 Streak: ${habit.streak}`;
+                if (habit.streak >= 10) {
+                    badge.textContent = `🔥 Streak: ${habit.streak}`;
+                } else {
+                    badge.textContent = `📈 Streak: ${habit.streak}`;
+                }
                 habitTitle.appendChild(badge);
             }
 
@@ -179,9 +219,14 @@ function renderHabits(filter = 'all') {
             progressBar.classList.add('progress-bar');
             progressBar.style.width = `${habit.progress}%`;
 
+            const progressText = document.createElement('span');
+            progressText.classList.add('progress-text');
+            progressText.textContent = `${habit.progress}%`;
+
             const completeButton = document.createElement('button');
-            completeButton.textContent = 'Mark as Complete';
+            completeButton.textContent = habit.completed ? '✓ Completed Today' : 'Mark as Complete';
             completeButton.classList.add('complete-btn');
+            completeButton.disabled = habit.completed;
             completeButton.addEventListener('click', () => markHabitComplete(habit.id));
 
             const editButton = document.createElement('button');
@@ -195,6 +240,7 @@ function renderHabits(filter = 'all') {
             removeButton.addEventListener('click', () => removeHabit(habit.id));
 
             progressDiv.appendChild(progressBar);
+            progressDiv.appendChild(progressText);
             habitDiv.appendChild(habitTitle);
             habitDiv.appendChild(progressDiv);
             habitDiv.appendChild(completeButton);
@@ -210,14 +256,26 @@ function renderHabits(filter = 'all') {
 
 function renderCategories() {
     categoryList.innerHTML = '';
+    if (categories.length === 0) {
+        categoryList.innerHTML = '<p>No categories added yet.</p>';
+        return;
+    }
     categories.forEach(category => {
         const categoryItem = document.createElement('div');
         categoryItem.classList.add('category-item');
-        categoryItem.textContent = category;
+        categoryItem.setAttribute('data-category', category);
+        
+        const categoryName = document.createElement('span');
+        categoryName.textContent = category;
+        categoryItem.appendChild(categoryName);
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', () => removeCategory(category));
+        deleteButton.type = 'button';
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeCategory(category);
+        });
 
         categoryItem.appendChild(deleteButton);
         categoryList.appendChild(categoryItem);
@@ -273,27 +331,48 @@ function updateAnalytics() {
 
 function resetProgressIfNeeded(habit) {
     const today = new Date().toISOString().split('T')[0];
+    const lastUpdatedDate = new Date(habit.lastUpdated);
+    const todayDate = new Date(today);
+    
+    // Calculate the difference in days
+    const timeDiff = todayDate.getTime() - lastUpdatedDate.getTime();
+    const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+    
+    // If more than 1 day has passed, reset streak
+    if (dayDiff > 1) {
+        habit.streak = 0;
+    }
+    
+    // Reset daily progress if a new day has started
     if (habit.lastUpdated !== today) {
-        const resetCondition = habit.frequency === 'daily' || (habit.frequency === 'weekly' && new Date(habit.lastUpdated) < new Date(today).setDate(new Date(today).getDate() - 7));
+        const resetCondition = habit.frequency === 'daily' || (habit.frequency === 'weekly' && dayDiff >= 7);
         if (resetCondition) {
             habit.progress = 0;
             habit.completed = false;
-            habit.lastUpdated = today;
         }
     }
 }
 
 function markHabitComplete(id) {
+    const today = new Date().toISOString().split('T')[0];
     habits = habits.map(habit => {
         if (habit.id === id) {
+            // First, check if streak needs to be reset (if a day was missed)
+            resetProgressIfNeeded(habit);
+            
             habit.progress = Math.min(habit.progress + 25, 100);
             habit.completed = habit.progress === 100;
+            
             if (habit.completed) {
-                habit.streak += 1;
-                habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
-                checkStreakMilestone(habit.streak, habit.name);
+                // Only increment streak if it's the first completion today
+                if (habit.lastUpdated !== today) {
+                    habit.streak += 1;
+                    habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
+                    checkStreakMilestone(habit.streak, habit.name);
+                    console.log(`✅ ${habit.name}: Streak increased to ${habit.streak}`);
+                }
             }
-            habit.lastUpdated = new Date().toISOString().split('T')[0];
+            habit.lastUpdated = today;
         }
         return habit;
     });
@@ -322,10 +401,19 @@ function removeHabit(id) {
 }
 
 function removeCategory(name) {
-    categories = categories.filter(category => category !== name);
-    updateCategoryOptions();
-    updateLocalStorage();
-    renderCategories();
+    // Check if category is used by any habits
+    const isUsed = habits.some(habit => habit.category === name);
+    if (isUsed) {
+        alert(`Cannot delete "${name}" category because it's being used by one or more habits.`);
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete the "${name}" category?`)) {
+        categories = categories.filter(category => category !== name);
+        updateCategoryOptions();
+        updateLocalStorage();
+        renderCategories();
+    }
 }
 
 function removeReminder(id) {
@@ -386,19 +474,72 @@ function requestNotificationPermission() {
 }
 
 function updateCategoryOptions() {
+    // Clear existing options
     habitCategorySelect.innerHTML = '';
     editHabitCategorySelect.innerHTML = '';
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        habitCategorySelect.appendChild(option);
-        editHabitCategorySelect.appendChild(option);
-    });
+    filterCategorySelect.innerHTML = '<option value="all">All Categories</option>';
+    
+    // Add categories from the categories array
+    if (categories && categories.length > 0) {
+        categories.forEach(category => {
+            // Add to habit category select
+            const option1 = document.createElement('option');
+            option1.value = category;
+            option1.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            habitCategorySelect.appendChild(option1);
+            
+            // Add to edit habit category select
+            const option2 = document.createElement('option');
+            option2.value = category;
+            option2.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            editHabitCategorySelect.appendChild(option2);
+            
+            // Add to filter category select
+            const option3 = document.createElement('option');
+            option3.value = category;
+            option3.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            filterCategorySelect.appendChild(option3);
+        });
+    } else {
+        // Fallback to default categories
+        const defaultCategories = ['health', 'productivity', 'learning'];
+        defaultCategories.forEach(category => {
+            const option1 = document.createElement('option');
+            option1.value = category;
+            option1.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            habitCategorySelect.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = category;
+            option2.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            editHabitCategorySelect.appendChild(option2);
+            
+            const option3 = document.createElement('option');
+            option3.value = category;
+            option3.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            filterCategorySelect.appendChild(option3);
+        });
+    }
 }
 
 function updateLocalStorage() {
     localStorage.setItem('habits', JSON.stringify(habits));
     localStorage.setItem('categories', JSON.stringify(categories));
     localStorage.setItem('reminders', JSON.stringify(reminders));
+}
+
+function clearAllData() {
+    if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        habits = [];
+        categories = ['health', 'productivity', 'learning'];
+        reminders = [];
+        updateLocalStorage();
+        renderHabits();
+        renderCategories();
+        renderReminders();
+        updateCategoryOptions();
+        updateOverview();
+        updateAnalytics();
+        alert('All data has been cleared.');
+    }
 }
