@@ -19,3 +19,6 @@ This project is a habit tracker that helps users monitor their daily or weekly h
 - Add Habit Form: Allows users to add new habits
 - Habit Overview: Summary of progress and streaks
 - Settings: Options to customize the tracker
+<img width="1594" height="794" alt="Screenshot 2025-12-16 141350" src="https://github.com/user-attachments/assets/8d0f8672-e57f-4b5f-a758-72e8645a6b2f" />
+<img width="1616" height="854" alt="Screenshot 2025-12-16 141444" src="https://github.com/user-attachments/assets/4bcbccc8-a4ba-436d-9510-7093b8a34011" />
+
